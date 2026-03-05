@@ -1,11 +1,23 @@
 extends Node2D
 
-# --- Constants ---
+# Main script for the Snake game.
+# Scene structure:
+#   Main (Node2D)
+#   ├── SnakeLayer (Node2D)
+#   ├── FoodLayer (Node2D)
+#   └── UI (CanvasLayer)
+#       ├── ScoreLabel (Label)
+#       └── GameOverLabel (Label)
+
+# --- Constants (M1.2) ---
 const GRID_SIZE: int = 20 # 20x20 grid
 const CELL_SIZE: int = 24 # Each cell is 24 pixels
-const TICK_SPEED: float = 0.12 # Seconds between each move
+const TICK_SPEED: float = 0.12 # Seconds between each movement tick
 
-# --- Game state ---
+# --- Assets (SPEC §19) ---
+var food_texture: Texture2D = preload("res://assets/apple.png")
+
+# --- Game state (M1.3) ---
 var snake_body: Array[Vector2i] = []
 var direction: Vector2i = Vector2i.RIGHT
 var next_direction: Vector2i = Vector2i.RIGHT
@@ -21,57 +33,59 @@ var tick_timer: float = 0.0
 @onready var game_over_label: Label = $UI/GameOverLabel
 
 
+# --- Initialization ---
 func _ready() -> void:
 	start_game()
 
 
 func start_game() -> void:
-	# Reset state
+	# Reset state (M1.3 + M3.4)
 	score = 0
 	game_over = false
 	tick_timer = 0.0
 	direction = Vector2i.RIGHT
 	next_direction = Vector2i.RIGHT
 
-	# Initialize snake at center of grid, length 3, facing right
+	# Initialize snake at center of grid, length 3, facing right (M1.3)
 	var center := Vector2i(GRID_SIZE / 2, GRID_SIZE / 2)
 	snake_body = [
-		center,
-		center + Vector2i.LEFT,
-		center + Vector2i.LEFT * 2,
+		center, # head at (10,10)
+		center + Vector2i.LEFT, # body at (9,10)
+		center + Vector2i.LEFT * 2, # tail at (8,10)
 	]
 
-	# Spawn first food
+	# Spawn first food (M2.1)
 	spawn_food()
 
-	# Update UI
+	# Update UI (M2.3)
 	score_label.text = "Score: 0"
 	game_over_label.visible = false
 
-	# Draw initial state
+	# Draw initial state (M1.6)
 	draw_game()
 
 
+# --- Main loop (M1.4) ---
 func _process(delta: float) -> void:
 	if game_over:
-		# Allow restart with R
-		if Input.is_action_just_pressed("ui_text_submit") or Input.is_key_pressed(KEY_R):
+		# Allow restart with R (M3.4)
+		if Input.is_key_pressed(KEY_R):
 			start_game()
 		return
 
-	# Handle directional input
+	# Handle directional input (M1.5)
 	handle_input()
 
-	# Accumulate time and move on each tick
+	# Accumulate time and move on each tick (M1.4)
 	tick_timer += delta
 	if tick_timer >= TICK_SPEED:
 		tick_timer -= TICK_SPEED
 		move_snake()
 
 
-# --- Input handling ---
+# --- Input handling (M1.5) ---
 func handle_input() -> void:
-	# Read input and buffer as next_direction (prevents 180° reversal)
+	# Buffer direction input; reject 180° reversal
 	if Input.is_action_just_pressed("ui_up") or Input.is_key_pressed(KEY_W):
 		if direction != Vector2i.DOWN:
 			next_direction = Vector2i.UP
@@ -86,7 +100,7 @@ func handle_input() -> void:
 			next_direction = Vector2i.RIGHT
 
 
-# --- Core game logic ---
+# --- Core movement logic (M1.4) ---
 func move_snake() -> void:
 	# Apply buffered direction
 	direction = next_direction
@@ -94,12 +108,12 @@ func move_snake() -> void:
 	# Calculate new head position
 	var new_head: Vector2i = snake_body[0] + direction
 
-	# Check wall collision
+	# Check wall collision (M3.1)
 	if new_head.x < 0 or new_head.x >= GRID_SIZE or new_head.y < 0 or new_head.y >= GRID_SIZE:
 		trigger_game_over()
 		return
 
-	# Check self collision (skip tail since it will move)
+	# Check self collision (M3.2)
 	if new_head in snake_body:
 		trigger_game_over()
 		return
@@ -107,22 +121,22 @@ func move_snake() -> void:
 	# Insert new head
 	snake_body.insert(0, new_head)
 
-	# Check if food was eaten
+	# Check if food was eaten (M2.2)
 	if new_head == food_pos:
 		score += 1
 		score_label.text = "Score: " + str(score)
 		spawn_food()
 	else:
-		# Remove tail (snake doesn't grow)
+		# Remove tail — snake doesn't grow
 		snake_body.pop_back()
 
 	# Redraw the game
 	draw_game()
 
 
-# --- Food spawning ---
+# --- Food spawning (M2.1) ---
 func spawn_food() -> void:
-	# Collect all free cells
+	# Collect all free cells not occupied by the snake
 	var free_cells: Array[Vector2i] = []
 	for x in range(GRID_SIZE):
 		for y in range(GRID_SIZE):
@@ -135,7 +149,7 @@ func spawn_food() -> void:
 		food_pos = free_cells[randi() % free_cells.size()]
 
 
-# --- Rendering ---
+# --- Rendering (M1.6) ---
 func draw_game() -> void:
 	# Clear previous frame
 	_clear_children(snake_layer)
@@ -149,12 +163,18 @@ func draw_game() -> void:
 		rect.color = Color.GREEN
 		snake_layer.add_child(rect)
 
-	# Draw food as a red square
-	var food_rect := ColorRect.new()
-	food_rect.size = Vector2(CELL_SIZE, CELL_SIZE)
-	food_rect.position = Vector2(food_pos.x * CELL_SIZE, food_pos.y * CELL_SIZE)
-	food_rect.color = Color.RED
-	food_layer.add_child(food_rect)
+	# Draw food using apple.png sprite (SPEC §19)
+	var food_sprite := Sprite2D.new()
+	food_sprite.texture = food_texture
+	food_sprite.position = Vector2(
+		food_pos.x * CELL_SIZE + CELL_SIZE / 2.0,
+		food_pos.y * CELL_SIZE + CELL_SIZE / 2.0
+	)
+	# Scale the sprite to fit one grid cell
+	if food_texture:
+		var tex_size := food_texture.get_size()
+		food_sprite.scale = Vector2(CELL_SIZE / tex_size.x, CELL_SIZE / tex_size.y)
+	food_layer.add_child(food_sprite)
 
 
 func _clear_children(node: Node) -> void:
@@ -162,7 +182,7 @@ func _clear_children(node: Node) -> void:
 		child.queue_free()
 
 
-# --- Game over ---
+# --- Game over (M3.3) ---
 func trigger_game_over() -> void:
 	game_over = true
 	game_over_label.text = "Game Over!\nScore: " + str(score) + "\nPress R to restart"
