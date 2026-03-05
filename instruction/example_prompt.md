@@ -12,16 +12,16 @@ TASKS.md
 Your task is to implement the next milestone.
 
 Current milestone:
-Milestone 3 – Milestone 3 — Collision System
+Milestone 7 — Optional Extensions
 
-Task:
-- Complete all task defined in Milestone 4 -> 6
+Tasks:
+- Do Milestone 7
 
 Instructions:
 
 1. Read AGENT_CONTRACT.md and follow the execution cycle strictly.
 2. Read SPEC_SNAKE.md to understand the required scene structure.
-3. Implement only the scope defined in TASKS.md for Milestone 4 -> 6.
+3. Implement only the scope defined in Tasks for Milestone 7.
 4. Do not implement tasks from future milestones.
 5. Do not refactor unrelated systems.
 

@@ -36,7 +36,7 @@ The implementation must:
 
 # 3. Window and Grid
 
-Window size: 480 × 480 pixels
+Window size: 1000 × 1050 pixels
 
 Grid size: 20 × 20 cells
 
@@ -352,6 +352,9 @@ Expected Usage
 
 Food sprite → assets/apple.png
 Grid background → assets/bg.png
+Snake Head → assets/snake_head.png
+Snake Body → assets/snake_body.png
+Snake Tail → assets/snake_tail.png
 
 ---
 End of Specification

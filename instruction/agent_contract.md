@@ -224,6 +224,16 @@ This project prioritises:
 
 The agent should favour **incremental improvements** rather than large rewrites.
 
+# 11. Asset Validation Rule
+
+Before using an asset in the game:
+
+1. Check the asset dimensions
+2. Confirm the sprite fills the frame
+3. Confirm alignment with grid cell size
+
+If the asset has excessive padding,
+the agent must crop or normalize it before use.
 ---
 
 End of Contract
