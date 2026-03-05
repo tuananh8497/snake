@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://cybg413dhj0v0"]
+
+[ext_resource type="Script" uid="uid://b4yi8t735pdf6" path="res://main.gd" id="1_0xm2m"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_0xm2m")
+
+[node name="SnakeLayer" type="Node2D" parent="."]
+
+[node name="FoodLayer" type="Node2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 200.0
+offset_bottom = 30.0
+text = "Score: 0"
+
+[node name="GameOverLabel" type="Label" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -20.0
+offset_right = 120.0
+offset_bottom = 20.0
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
